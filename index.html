@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Моя карта</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            background: #2c3e50;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .map-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        .map-image {
+            max-width: 100%;
+            height: auto;
+        }
+        .marker {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: red;
+            border-radius: 50%;
+            border: 2px solid white;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+        }
+        .photo-tooltip {
+            position: fixed;
+            display: none;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            padding: 5px;
+            border: 1px solid #ddd;
+        }
+        .photo-tooltip img {
+            max-width: 360px;
+            max-height: 360px;
+            border-radius: 5px;
+            display: block;
+        }
+        .photo-tooltip .close-tooltip {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            line-height: 22px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            border: 1px solid #ddd;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Нечетный</h2>
+        <div class="map-wrapper" id="mapWrapper">
+            <img id="mapImage" class="map-image" src="mymap1.jpg" alt="Карта">
+        </div>
+    </div>
+
+    <div id="photoTooltip" class="photo-tooltip">
+        <span class="close-tooltip">×</span>
+        <img id="tooltipImg" src="">
+    </div>
+
+    <script>
+        // ========== СЮДА ВСТАВЬ МЕТКИ ИЗ JSON ==========
+        const markersData = [
+  {
+    "x": 34.45603158686342,
+    "y": 72.90244643220075,
+    "photo": "pictures/9.png"
+  },
+  {
+    "x": 34.75603574341515,
+    "y": 84.6324537749351,
+    "photo": "pictures/10.png"
+  },
+  {
+    "x": 71.35654284272616,
+    "y": 86.45262732811801,
+    "photo": "pictures/11.png"
+  },
+  {
+    "x": 84.35672295996777,
+    "y": 83.72236699834365,
+    "photo": "pictures/12.png"
+  },
+  {
+    "x": 85.1567340441057,
+    "y": 71.99235965560928,
+    "photo": "pictures/13.png"
+  },
+  {
+    "x": 82.75670079169187,
+    "y": 46.105446899229996,
+    "photo": "pictures/14.png"
+  },
+  {
+    "x": 82.05669109307118,
+    "y": 39.90337225120385,
+    "photo": "pictures/15.png"
+  },
+  {
+    "x": 79.65665784065735,
+    "y": 32.19572421968558,
+    "photo": "pictures/16.png"
+  },
+  {
+    "x": 72.75656223996756,
+    "y": 15.735512295052878,
+    "photo": "pictures/17.png"
+  },
+  {
+    "x": 51.25626435376027,
+    "y": 16.196174060144504,
+    "photo": "pictures/18.png"
+  },
+  {
+    "x": 28.355947070311583,
+    "y": 42.161737534000345,
+    "photo": "pictures/1.png"
+  },
+  {
+    "x": 41.25612580203595,
+    "y": 41.858375275136524,
+    "photo": "pictures/2.png"
+  },
+  {
+    "x": 66.85648049445021,
+    "y": 48.33010346423134,
+    "photo": "pictures/3.png"
+  },
+  {
+    "x": 68.35650127720886,
+    "y": 57.83545424196436,
+    "photo": "pictures/4.png"
+  },
+  {
+    "x": 61.55640706203632,
+    "y": 70.07106534947175,
+    "photo": "pictures/5.png"
+  },
+  {
+    "x": 55.45632254548448,
+    "y": 72.80132567924613,
+    "photo": "pictures/6.png"
+  },
+  {
+    "x": 48.156221402725734,
+    "y": 72.90244643220075,
+    "photo": "pictures/7.png"
+  },
+  {
+    "x": 21.855857011690773,
+    "y": 40.74604544965561,
+    "photo": "pictures/19.png"
+  },
+  {
+    "x": 43.65615905444979,
+    "y": 37.6787156862025,
+    "photo": "pictures/output_green.png"
+  },
+  {
+    "x": 82.65669940617464,
+    "y": 79.47529537425017,
+    "photo": "pictures/output_green.png"
+  },
+  {
+    "x": 46.756202005484326,
+    "y": 16.645599071644337,
+    "photo": "pictures/output_green.png"
+  },
+  {
+    "x": 28.255945684794337,
+    "y": 12.600768953460076,
+    "photo": "pictures/output_green.png"
+  },
+  {
+    "x": 60.256389050312166,
+    "y": 40.28538407030904,
+    "photo": "pictures/green.png"
+  },
+  {
+    "x": 71.85654977031237,
+    "y": 53.08277731011761,
+    "photo": "pictures/green.png"
+  },
+  {
+    "x": 67.25648603651918,
+    "y": 64.30718088807895,
+    "photo": "pictures/green.png"
+  },
+  {
+    "x": 52.35627959444995,
+    "y": 73.00356718515535,
+    "photo": "pictures/green.png"
+  },
+  {
+    "x": 28.05594291375985,
+    "y": 73.20580869106456,
+    "photo": "pictures/green.png"
+  },
+  {
+    "x": 38.05608146548417,
+    "y": 80.68874440970545,
+    "photo": "pictures/green.png"
+  },
+  {
+    "x": 51.05626158272578,
+    "y": 81.5988311862969,
+    "photo": "pictures/green.png"
+  },
+  {
+    "x": 85.65674097169193,
+    "y": 52.004156973921965,
+    "photo": "pictures/green.png"
+  },
+  {
+    "x": 34.856037128932385,
+    "y": 17.252323589371976,
+    "photo": "pictures/green.png"
+  },
+  {
+    "x": 13.355739242725104,
+    "y": 18.982612468138228,
+    "photo": "pictures/green.png"
+  },
+  {
+    "x": 13.355739242725104,
+    "y": 30.094659214607013,
+    "photo": "pictures/green.png"
+  },
+  {
+    "x": 79.5566564551401,
+    "y": 42.128029587695316,
+    "photo": "pictures/input_green.png"
+  },
+  {
+    "x": 74.2565830227262,
+    "y": 16.746719824598944,
+    "photo": "pictures/input_two_yellow.png"
+  },
+  {
+    "x": 72.45655808341583,
+    "y": 82.71115946879758,
+    "photo": "pictures/input_two_yellow.png"
+  },
+  {
+    "x": 58.94764305169129,
+    "y": 81.79657294234957,
+    "photo": "pictures/yellow_spark.png"
+  },
+  {
+    "x": 21.547022142945732,
+    "y": 34.3709427337115,
+    "photo": "pictures/yellow.png"
+  },
+  {
+    "x": 19.960250357136427,
+    "y": 41.153272846546905,
+    "photo": "pictures/white.png"
+  },
+  {
+    "x": 30.16037798324503,
+    "y": 38.321916301184004,
+    "photo": "pictures/white.png"
+  },
+  {
+    "x": 81.96102612367892,
+    "y": 23.760649328775287,
+    "photo": "pictures/yellow_spark.png"
+  }
+];
+        // =============================================
+
+        const mapWrapper = document.getElementById('mapWrapper');
+        const mapImage = document.getElementById('mapImage');
+        const tooltip = document.getElementById('photoTooltip');
+        const tooltipImg = document.getElementById('tooltipImg');
+        const closeTooltip = document.querySelector('.close-tooltip');
+
+        function renderMarkers() {
+            document.querySelectorAll('.marker').forEach(m => m.remove());
+            markersData.forEach((m) => {
+                let dot = document.createElement('div');
+                dot.className = 'marker';
+                dot.style.left = m.x + '%';
+                dot.style.top = m.y + '%';
+                dot.onclick = (e) => {
+                    e.stopPropagation();
+                    showPhoto(m.photo, e);
+                };
+                mapWrapper.appendChild(dot);
+            });
+        }
+
+        function showPhoto(photoUrl, event) {
+            tooltipImg.src = photoUrl;
+            let x = event.clientX + 15;
+            let y = event.clientY + 15;
+            if (x + 380 > window.innerWidth) {
+                x = event.clientX - 380;
+            }
+            if (y + 380 > window.innerHeight) {
+                y = event.clientY - 380;
+            }
+            tooltip.style.left = x + 'px';
+            tooltip.style.top = y + 'px';
+            tooltip.style.display = 'block';
+        }
+
+        function hidePhoto() {
+            tooltip.style.display = 'none';
+        }
+
+        closeTooltip.onclick = hidePhoto;
+        
+        document.addEventListener('click', (e) => {
+            if (!tooltip.contains(e.target) && !e.target.classList.contains('marker')) {
+                hidePhoto();
+            }
+        });
+
+        mapImage.onload = () => {
+            renderMarkers();
+        };
+
+        if (mapImage.complete) {
+            renderMarkers();
+        }
+    </script>
+</body>
+</html>
